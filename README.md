@@ -15,6 +15,7 @@ This is just a research purpose dataset scraper for the apache jira
 - [ ] Headless in header (to reduce the checks)
 - [ ] Cracking common patterns (like issue number is auto increment int field)
 - [ ] Distributed Facility (like three page limiting for the extraction)
+- [ ] Strategies to be considered for the efficient concurrency
 
 ## Post scraping Rsearch
 - [ ] Dataset file
