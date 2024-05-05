@@ -39,29 +39,32 @@ def addExcelRow(project_name, project_id, project_lead, project_category, projec
 def getIssueDetails(content):
     """ Uses Beautiful soup and returns the details for current html page"""
     soup = BeautifulSoup(content, "html.parser")
-    rows = soup.find_all('li', class_='item')
-    issue_title = soup.find('h1', {"id": "summary-val"}).text
-    issue_id = soup.find('a', {"id": "key-val"}).text
     ans = {}
-    ans['Id'] = issue_id
-    ans['Title'] = issue_title
-    for r in rows:
-        # Find the detail title
-        head = r.find('div',class_='wrap').strong
-        if head == None:    head = 'Not found'
-        elif head.label == None:    head = head.text.strip()
-        else:       head = head.label.text.strip()
+    try:
+        rows = soup.find_all('li', class_='item')
+        issue_title = soup.find('h1', {"id": "summary-val"}).text
+        issue_id = soup.find('a', {"id": "key-val"}).text
+        ans['Id'] = issue_id
+        ans['Title'] = issue_title
+        for r in rows:
+            # Find the detail title
+            head = r.find('div',class_='wrap').strong
+            if head == None:    head = 'Not found'
+            elif head.label == None:    head = head.text.strip()
+            else:       head = head.label.text.strip()
 
-        # Find teh detail value
-        val = r.find('div',class_='wrap').find('span', class_='value')
-        if val == None:
-            val = r.find('div',class_='wrap').find('span', class_='labels-wrap value')
-        if val == None:     val = 'Not Found'
-        else:               val = val.text.strip()
+            # Find teh detail value
+            val = r.find('div',class_='wrap').find('span', class_='value')
+            if val == None:
+                val = r.find('div',class_='wrap').find('span', class_='labels-wrap value')
+            if val == None:     val = 'Not Found'
+            else:               val = val.text.strip()
 
-        ans[head] = val
-    # print(ans)
-    # {'Id': 'AAR-51816', 'Title': 'Balloons in Dubai - delivery on the same day | Online Helium balloon Store for party, birthday', 'Type:': 'Bug', 'Status:': 'Open', 'Priority:': 'Major', 'Resolution:': 'Unresolved', 'Labels:': 'Not Found', 'External issue URL:': 'Not Found'}
+            ans[head] = val
+        # print(ans)
+        # {'Id': 'AAR-51816', 'Title': 'Balloons in Dubai - delivery on the same day | Online Helium balloon Store for party, birthday', 'Type:': 'Bug', 'Status:': 'Open', 'Priority:': 'Major', 'Resolution:': 'Unresolved', 'Labels:': 'Not Found', 'External issue URL:': 'Not Found'}
+    except Exception as e:
+        pass
     return ans
 
 def getIssues(url) -> list[dict]:
