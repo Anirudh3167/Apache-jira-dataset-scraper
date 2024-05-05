@@ -9,13 +9,15 @@ This is just a research purpose dataset scraper for the apache jira
 - Then extract the data for each issue link.
 
 # Current Progress
-## Pre scraping Research
-- [ ] Multi Threading (Max threads to be deployed)
-- [x] Page load strategy (eager, Normal) <br>Result:`No Significant reduction`
-- [x] Headless in header (to reduce the checks) <br> Result: `Not recomeneded`
-- [x] Cracking common patterns (like issue number is auto increment int field) <br> Result: `Found a way to get the issue count and how to get the links`
-- [ ] Distributed Facility (like three page limiting for the extraction)
-- [ ] Strategies to be considered for the efficient concurrency
+- [ ] Add the heading for issue extraction
+- [ ] Serializer 
+```
+(Project Name, Project Id, Project Lead, Project Category, Project URL, 
+Issue Id, Issue Heading, Issue Type, Issue Status, Issue Priority, Issue Resolution, Issue Labels,
+)
+```
+- [ ] Excel File Code
+- [ ] Run The code
 
 ## Post scraping Rsearch
 - [ ] Dataset file
