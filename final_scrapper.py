@@ -204,22 +204,24 @@ def scrape_projects(url, threads = 10) -> list[dict]:
     global ans
     
     res = getProjects(url)
-    with open("projects.txt", 'w') as f:
-        with ThreadPoolExecutor(max_workers=threads) as executor:
-            future_to_project = {executor.submit(get_project_issues, project): project for project in res}
-            for future in concurrent.futures.as_completed(future_to_project):
-                project_key = future_to_project[future]
-                try:
-                    answer = future.result()
+    
+    with ThreadPoolExecutor(max_workers=threads) as executor:
+        future_to_project = {executor.submit(get_project_issues, project): project for project in res}
+        for future in concurrent.futures.as_completed(future_to_project):
+            project_key = future_to_project[future]
+            try:
+                answer = future.result()
+                with open("projects.txt", 'w') as f:
                     f.write(answer)
-                    ans.extend(answer)
-                except Exception as e:
-                    print(f"Error occurred for project {project_key}: {e}")
+                    f.close()
+                ans.extend(answer)
+            except Exception as e:
+                print(f"Error occurred for project {project_key}: {e}")
     return ans
 
 url = "https://issues.apache.org/jira/projects"
 
-threads = 4
+threads = 12
 ans = scrape_projects( url,threads )
 # print(ans)
 
