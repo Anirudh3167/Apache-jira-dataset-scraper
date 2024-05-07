@@ -76,7 +76,7 @@ def getProjects( url ):
 
   # Simulate the click of a project.
   count = 0
-  while count < 25:
+  while count < len(project_res):
     try:
         link = driver.find_elements(By.CSS_SELECTOR,'td.cell-type-name > a')
         link[count].click()
@@ -110,6 +110,9 @@ def MultiThreading():
     futures = [executor.submit(getProjects, url) for url in page_urls]
     # Retrieve results from each thread
     for future in futures:
+       with open("projects.txt", 'w') as f:
+          f.write(future.result())
+          f.close()
        storage.extend(future.result())
   print('Multi threading completed')
   # Write the data to csv file
