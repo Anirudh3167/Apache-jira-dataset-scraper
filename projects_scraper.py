@@ -106,7 +106,7 @@ def getProjects( url ):
 
 def MultiThreading():
    
-  page_urls = [f'https://issues.apache.org/jira/projects?selectedCategory=all&selectedProjectType=all&sortColumn=name&sortOrder=ascending&s=view_projects&page={i}' for i in range(1,28)]
+  page_urls = [f'https://issues.apache.org/jira/projects?selectedCategory=all&selectedProjectType=all&sortColumn=name&sortOrder=ascending&s=view_projects&page={i}' for i in range(13,28)]
   # Deploy multiple threads.
   print('Multi Threading Activated')
   with ThreadPoolExecutor(max_workers=4) as executor:

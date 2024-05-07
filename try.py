@@ -2,18 +2,21 @@ import pandas as pd
 import json
 
 # Read the .txt file
-file_path = "C:/Users/Lakshay Sharma/Downloads/projects.txt"  # Update this with the actual file path
+file_path = "C:/Users/Lakshay Sharma/Downloads/projectsppp.txt"  # Update this with the actual file path
+
+
+import pandas as pd
+
+# Read the text file
 with open(file_path, 'r') as file:
-    file_content = file.read()
+    text_data = file.read()
 
-    # Split the content into individual JSON objects
-    # json_data = json.loads(file_content)
+# Split the text data into individual records
+records = eval(text_data)
 
-    # Convert the JSON data to a pandas DataFrame
-    df = pd.DataFrame(file_content)
+# Convert the data into a pandas DataFrame
+df = pd.DataFrame(records, columns=['Name', 'Code', 'URL', 'Author', 'Count'])
 
-    # Export the DataFrame to an Excel file
-    excel_filename = 'projectsaaaa.xlsx'
-    df.to_excel(excel_filename, index=False)
+# Write the DataFrame to an Excel file
+df.to_excel('output.xlsx', index=False)
 
-    print(f"Data exported to {excel_filename}")
