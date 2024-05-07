@@ -11,18 +11,18 @@ import pprint, time
 import pandas as pd
 import json
 
-MAX_ISSUES_PER_PROJECT = 10
+MAX_ISSUES_PER_PROJECT = 0
 
 # Maximum number for PROJECT_COUNT is 663 
 PROJECT_COUNT = 663
 
 url = "https://issues.apache.org/jira/projects"
-threads = 20
+threads = 10
 s, l = 0, 20
 
-PROJECTS_ONLY = True
+PROJECTS_ONLY = False
 
-df = pd.DataFrame(columns=["Project Name", "Project Id", "Project Lead", "Project Category", "Project URL", "Issue Id", "Issue Heading", "Issue Type", "Issue Status", "Issue Priority", "Issue Resolution", "Issue Labels", "Issue External Issue URL", "Issue Language", "Issue Environment"])
+df = pd.DataFrame(columns=["Project Name", "Project Id", "Project Lead", "Project Category", "Project URL", "Project Issue Count", "Issue Id", "Issue Heading", "Issue Type", "Issue Status", "Issue Priority", "Issue Resolution", "Issue Labels", "Issue External Issue URL", "Issue Language", "Issue Environment"])
 df_projects_only = pd.DataFrame(columns=["Project Name", "Project Id", "Project Lead", "Project Category", "Project URL", "Issue Count"])
 
 def scrapeIssuesPagination(html_content):
@@ -46,13 +46,14 @@ def getIssueIdNumber(url):
 ##############################################
 # Serialization
 ##############################################
-def addExcelRow(project_name, project_id, project_lead, project_category, project_URL, issue_id, issue_heading, issue_type, issue_status, issue_priority, issue_resolution, issue_labels, issue_external_issue_url, issue_language, issue_environment):
+def addExcelRow(project_name, project_id, project_lead, project_category, project_URL,project_issue_count, issue_id, issue_heading, issue_type, issue_status, issue_priority, issue_resolution, issue_labels, issue_external_issue_url, issue_language, issue_environment):
     res_dict = {}
     res_dict["Project Name"] = project_name
     res_dict["Project Id"] = project_id
     res_dict["Project Lead"] = project_lead
     res_dict["Project Category"] = project_category
     res_dict["Project URL"] = project_URL
+    res_dict["Project Issue Count"] = project_issue_count
     res_dict["Issue Id"] = issue_id
     res_dict["Issue Heading"] = issue_heading
     res_dict["Issue Type"] = issue_type 
@@ -123,7 +124,7 @@ def getIssues(url) -> list[dict]:
     # Load the html page
     driver = webdriver.Chrome()  
     driver.get(url)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 2)
     projects_table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "list-content")))
 
     # Simulate next click (until next is not found)
@@ -191,7 +192,7 @@ def getProjects(url) -> list[dict]:
     # Load the html page
     driver = webdriver.Chrome()  
     driver.get(url)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 3)
     projects_table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "projects-list")))
     
     # Get the project ids in that page.
@@ -239,15 +240,21 @@ def get_project_issues(project : dict) -> list[dict]:
     print("Getting issues for project " + project["project_name"])
     all_issues = getIssues(url)
     total_issue_count = getIssueIdNumber(url)
-    print("Found " + str(len(all_issues)) + " issues out of " + str(total_issue_count) + " for " + project["project_name"])
+    # print("Found " + str(len(all_issues)) + " issues out of " + str(total_issue_count) + " for " + project["project_name"])
+    
+    project["issue_count"] = total_issue_count
     
     res = []
+    # for issue in all_issues:
+    #     add_element_to_dict(issue, "Issue Count", total_issue_count)
+    
     for issue in all_issues:
         res.append(addExcelRow(project_id=project["project_id"], 
                     project_name=project["project_name"],
                     project_lead=project["project_lead"],
                     project_category=project["project_category"],
                     project_URL=project["project_URL"],
+                    project_issue_count=project["issue_count"],
                     issue_id=issue.get("Id", "Not Found"),
                     issue_heading=issue.get("Title", "Not Found"),
                     issue_type=issue.get("Type", "Not Found"),
@@ -281,7 +288,7 @@ def scrape_projects(url, threads = 10, start=0, limit = 10) -> list[dict]:
                 project_key = future_to_project[future]
                 try:
                     answer = future.result()
-                    with open("projects.txt", 'w') as f:
+                    with open("projects.txt", 'a') as f:
                         f.write(json.dumps(answer))
                         f.close()
                     print( "Saved project : ", project_key["project_name"])
@@ -299,7 +306,7 @@ def scrape_projects(url, threads = 10, start=0, limit = 10) -> list[dict]:
         
         #######################################
         with ThreadPoolExecutor(max_workers=threads) as executor:
-            future_to_project = {executor.submit(add_element_to_dict, "Issue Count", getIssueIdNumber(f"https://issues.apache.org/jira/projects/{project['project_id']}/issues/")) : project for project in res1}
+            future_to_project = {executor.submit(add_element_to_dict, ["Issue Count", getIssueIdNumber(f"https://issues.apache.org/jira/projects/{project['project_id']}/issues/")]) : project for project in res1}
             for future in concurrent.futures.as_completed(future_to_project):
                 project_key = future_to_project[future]
                 try:
@@ -310,7 +317,7 @@ def scrape_projects(url, threads = 10, start=0, limit = 10) -> list[dict]:
                 
         # This will work serially
         # ans = [add_element_to_dict(project, "Issue Count", getIssueIdNumber(f"https://issues.apache.org/jira/projects/{project['project_id']}/issues/")) for project in res1]
-        df_projects_only = addToExcel(df_projects_only, ans)
+    df_projects_only = addToExcel(df_projects_only, ans)
 
 # for all 663 projects
 while (s < len(res)):

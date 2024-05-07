@@ -1,31 +1,19 @@
-import requests
-from bs4 import BeautifulSoup
+import pandas as pd
+import json
 
-base_url = "https://issues.apache.org/jira/projects"
-element_class = "projects-list"
-data = []
+# Read the .txt file
+file_path = "C:/Users/Lakshay Sharma/Downloads/projects.txt"  # Update this with the actual file path
+with open(file_path, 'r') as file:
+    file_content = file.read()
 
-try:
-    for page_num in range(1, 3):  # Iterate from page 1 to 27
-        url = f"{base_url}?selectedCategory=all&selectedProjectType=all&sortColumn=name&sortOrder=ascending&s=view_projects&page={page_num}"
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        rows = soup.find_all("tr", {"data-project-id": True})
-        for row in rows:
-            project_id = row["data-project-id"]
-            project_key = row.find("td", {"class": "cell-type-key"}).text
-            project_name = row.find("a", {"href": True}).text
-            project_url = row.find("a", {"href": True})["href"]
-            
+    # Split the content into individual JSON objects
+    # json_data = json.loads(file_content)
 
-            print(f"Project ID: {project_id}")
-            print(f"Project Key: {project_key}")
-            print(f"Project Name: {project_name}")
-            print(f"Project URL: {project_url}")
-            print("-------------------------")
-        print(page_num)
-except Exception as e:
-    pass
-print(data)
+    # Convert the JSON data to a pandas DataFrame
+    df = pd.DataFrame(file_content)
 
-# Now 'data' contains the tables with class 'jira-sortable-table' from all pages
+    # Export the DataFrame to an Excel file
+    excel_filename = 'projectsaaaa.xlsx'
+    df.to_excel(excel_filename, index=False)
+
+    print(f"Data exported to {excel_filename}")

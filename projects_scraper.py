@@ -64,38 +64,41 @@ def getProjects( url ):
   res = []
 #   url = "https://issues.apache.org/jira/projects"
   # Load the html page
-  driver = webdriver.Chrome()  
-  driver.get(url)
-  wait = WebDriverWait(driver, 1)
-  projects_table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "projects-list")))
-  
-  # Get the project ids in that page.
-  count = 0
-  final_res = []
-  project_res = getProjectDetails( driver.page_source )
+  try:
+    
+    driver = webdriver.Chrome()  
+    driver.get(url)
+    wait = WebDriverWait(driver, 1)
+    projects_table = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "projects-list")))
+    
+    # Get the project ids in that page.
+    count = 0
+    final_res = []
+    project_res = getProjectDetails( driver.page_source )
 
-  # Simulate the click of a project.
-  count = 0
-  while count < len(project_res):
-    try:
-        link = driver.find_elements(By.CSS_SELECTOR,'td.cell-type-name > a')
-        link[count].click()
-        wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
-        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "list-content")))
-        project_res[count]['Number of Issues'] = driver.find_element(By.CSS_SELECTOR, "div.pagination").get_attribute("data-displayable-total") 
-    except:
-        project_res[count]['Number of Issues'] = '0'
-    final_res.append( ProjectsSerializer(project_res[count]) )
-    driver.back()
-    wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
-    wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "projects-list")))
-    count += 1
-  print('Extraction of project details copmleted till ',page_count)
-  page_count += 1
-  driver.quit()
-  # print(res) # all 668 rows
-  return final_res
-
+    # Simulate the click of a project.
+    count = 0
+    while count < len(project_res):
+      try:
+          link = driver.find_elements(By.CSS_SELECTOR,'td.cell-type-name > a')
+          link[count].click()
+          wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
+          wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "list-content")))
+          project_res[count]['Number of Issues'] = driver.find_element(By.CSS_SELECTOR, "div.pagination").get_attribute("data-displayable-total") 
+      except:
+          project_res[count]['Number of Issues'] = '0'
+      final_res.append( ProjectsSerializer(project_res[count]) )
+      driver.back()
+      wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
+      wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "projects-list")))
+      count += 1
+    print('Extraction of project details copmleted till ',page_count)
+    page_count += 1
+    driver.quit()
+    # print(res) # all 668 rows
+    return final_res
+  except:
+    return []
 # final_res = getProjects()
 
 # pprint.pprint( final_res )
@@ -110,10 +113,15 @@ def MultiThreading():
     futures = [executor.submit(getProjects, url) for url in page_urls]
     # Retrieve results from each thread
     for future in futures:
-       with open("projects.txt", 'w') as f:
-          f.write(future.result())
+      try:
+        a = future.result()
+      except:
+        a = None
+      if a is not None:
+        with open("projectsppp.txt", 'a') as f:
+          f.write(str(a))
           f.close()
-       storage.extend(future.result())
+        storage.extend(a)
   print('Multi threading completed')
   # Write the data to csv file
   AddToCSV()

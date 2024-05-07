@@ -37,7 +37,6 @@ def get_projects(url, limit = 25):
         print(f"Project Name: {project_name}")
         print(f"Project Lead: {project_lead}")
         print(f"Project Category: {project_category}")
-        print(f"Project URL: {project_url}")
         print(f"Project Direct URL: {project_direct_url}")
         print("-------------------------")
 
@@ -58,7 +57,7 @@ except Exception as e:
 
 # print(data_list)
 # Create a DataFrame from the collected data
-df = pd.DataFrame(data_list, columns=["Project ID", "Project Key", "Project Name", "Project Lead", "Project Category", "Project URL", "Project Direct URL"])
+df = pd.DataFrame(data_list, columns=["Project ID", "Project Key", "Project Name", "Project Lead", "Project Category", "Project Direct URL"])
 
 # # Save the DataFrame to an Excel file
 df.to_excel("projects_data.xlsx", index=False)
